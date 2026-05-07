@@ -8,7 +8,6 @@ import com.tomoya.MathHelper;
 import org.bukkit.*;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -77,7 +76,7 @@ public class WaypointHelper {
 
                 //get all entities on the beacon
                 Objects.requireNonNull(Bukkit.getWorld(startWaypoint.getWorldName())).getNearbyEntities(startLoc, 0.5, 0.5, 0.5).forEach(entity -> {
-                    if (entity.getType() == EntityType.PLAYER && (!groupTeleporting || entity.getUniqueId().equals(player.getUniqueId()))) {
+                    if (entity instanceof Player target && (groupTeleporting || target.getUniqueId().equals(player.getUniqueId()))){
                         WaypointManager waypointManager = BeaconWaypointsReloaded.getWaypointManager();
                         WaypointPlayer waypointPlayer = waypointManager.getPlayer(entity.getUniqueId());
                         if (waypointPlayer == null) {

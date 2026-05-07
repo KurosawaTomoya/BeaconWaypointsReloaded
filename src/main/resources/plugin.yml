@@ -1,5 +1,5 @@
 name: BeaconWaypointsReloaded
-version: '1.1'
+version: '1.0.1'
 main: com.tomoya.BeaconWaypointsReloaded
 api-version: '1.21'
 description: Allows players to set fast travel waypoints at beacons

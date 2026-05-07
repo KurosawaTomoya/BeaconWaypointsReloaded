@@ -52,7 +52,7 @@ public class MathHelper {
     }
 
     public static int setXp(Player player, int exp) {
-        int currentXp = getPlayerXp(player);
+        int currentXp = getXpPoints(player);
         int newExp = currentXp + exp;
 
         player.setExp(0);
@@ -78,11 +78,4 @@ public class MathHelper {
         return currentXp + exp;
     }
 
-    public static int getPlayerXp(Player player){
-        int xp = 0;
-        int level = player.getLevel();
-        xp += getXpAtLevel(level);
-        xp += Math.round(getXpToLevelUp(level) * player.getExp());
-        return xp;
-    }
 }
