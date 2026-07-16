@@ -1,14 +1,8 @@
 package com.tomoya.listeners;
 
-import com.tomoya.LanguageManager;
-import com.tomoya.BeaconWaypointsReloaded;
-import com.tomoya.gui.GUIs;
-import com.tomoya.waypoints.Waypoint;
-import com.tomoya.waypoints.WaypointCoord;
-import com.tomoya.waypoints.WaypointManager;
-import com.tomoya.waypoints.WaypointPlayer;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.util.List;
+import java.util.UUID;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,6 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -29,12 +24,18 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.List;
-import java.util.UUID;
+import com.tomoya.BeaconWaypointsReloaded;
+import com.tomoya.LanguageManager;
+import com.tomoya.gui.GUIs;
+import com.tomoya.waypoints.Waypoint;
+import com.tomoya.waypoints.WaypointCoord;
+import com.tomoya.waypoints.WaypointManager;
+import com.tomoya.waypoints.WaypointPlayer;
 
 public class WorldListener implements Listener {
 
-    //adds players to waypointPlayers map when they join if they are already not in the map
+    // adds players to waypointPlayers map when they join if they are already not in
+    // the map
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         BeaconWaypointsReloaded plugin = BeaconWaypointsReloaded.getPlugin();
@@ -42,7 +43,7 @@ public class WorldListener implements Listener {
         LanguageManager languageManager = BeaconWaypointsReloaded.getLanguageManager();
         WaypointPlayer waypointPlayer = waypointManager.getPlayer(e.getPlayer().getUniqueId());
 
-        //add if not in map
+        // add if not in map
         if (waypointPlayer == null)
             waypointManager.addPlayer(e.getPlayer().getUniqueId(), e.getPlayer().getName());
         else if (waypointPlayer.getUsername() == null || !waypointPlayer.getUsername().equals(e.getPlayer().getName()))
@@ -50,7 +51,8 @@ public class WorldListener implements Listener {
 
     }
 
-    //add new non-activated waypoint when one is placed, and make the player who placed it the owner
+    // add new non-activated waypoint when one is placed, and make the player who
+    // placed it the owner
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent e) {
         if (e.getBlock().getType() == Material.BEACON) {
@@ -60,7 +62,7 @@ public class WorldListener implements Listener {
         }
     }
 
-    //delete waypoint when beacon is broken
+    // delete waypoint when beacon is broken
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         if (e.getBlock().getType() == Material.BEACON) {
@@ -68,7 +70,8 @@ public class WorldListener implements Listener {
             LanguageManager languageManager = BeaconWaypointsReloaded.getLanguageManager();
             WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
 
-            //check if player has permission to break waypoint beacons and if the beacon has waypoints
+            // check if player has permission to break waypoint beacons and if the beacon
+            // has waypoints
             Waypoint publicWaypoint1 = waypointManager.getPublicWaypoint(waypointCoord);
             List<Waypoint> privateWaypoints = waypointManager.getPrivateWaypointsAtCoord(waypointCoord);
             boolean ownsWaypoint = true;
@@ -82,7 +85,8 @@ public class WorldListener implements Listener {
                     }
                 }
             }
-            if (!e.getPlayer().hasPermission("BeaconWaypoints.manageAllWaypoints") && !e.getPlayer().hasPermission("BeaconWaypoints.breakWaypointBeacons")) {
+            if (!e.getPlayer().hasPermission("BeaconWaypoints.manageAllWaypoints")
+                    && !e.getPlayer().hasPermission("BeaconWaypoints.breakWaypointBeacons")) {
                 FileConfiguration config = BeaconWaypointsReloaded.getPlugin().getConfig();
                 if (!config.contains("allow-beacon-break-by-owner"))
                     config.set("allow-beacon-break-by-owner", true);
@@ -90,9 +94,8 @@ public class WorldListener implements Listener {
                     e.getPlayer().sendMessage(ChatColor.RED + languageManager.getString("no-break-permission"));
                     e.setCancelled(true);
                 }
-            }
-            else {
-                //wait for one tick to see if plugins like WorldGuard restored the block
+            } else {
+                // wait for one tick to see if plugins like WorldGuard restored the block
                 new BukkitRunnable() {
                     @Override
                     public void run() {
@@ -103,20 +106,27 @@ public class WorldListener implements Listener {
         }
     }
 
-    //deletes waypoints if they are removed with fill or setblock commands
-    @EventHandler
+    // deletes waypoints if they are removed with fill or set block commands
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPhysics(BlockPhysicsEvent e) {
-        if (e.getBlock().getType() == Material.AIR) {
-            WaypointManager waypointManager = BeaconWaypointsReloaded.getWaypointManager();
-            WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
-            waypointManager.removeWaypointsAtCoord(waypointCoord);
-        }
+        if (e.getBlock().getType() != Material.AIR)
+            return;
+
+        WaypointManager waypointManager = BeaconWaypointsReloaded.getWaypointManager();
+        WaypointCoord waypointCoord = new WaypointCoord(e.getBlock().getLocation());
+
+        if (!waypointManager.hasWaypointAtCoord(waypointCoord))
+            return;
+
+        waypointManager.removeWaypointsAtCoord(waypointCoord);
     }
 
-    //when player opens a beacon
+    // when player opens a beacon
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
-        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND && e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.BEACON && !e.getPlayer().isSneaking()) {
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.getHand() == EquipmentSlot.HAND
+                && e.getClickedBlock() != null && e.getClickedBlock().getType() == Material.BEACON
+                && !e.getPlayer().isSneaking()) {
             Player player = e.getPlayer();
 
             // TRICK LỎ: Kiểm tra xem player có đang muốn mở vanilla menu không
@@ -126,7 +136,7 @@ public class WorldListener implements Listener {
                 return;
             }
 
-            //check if player has permission to use waypoints
+            // check if player has permission to use waypoints
             if (player.hasPermission("BeaconWaypoints.useWaypoints")) {
                 WaypointManager waypointManager = BeaconWaypointsReloaded.getWaypointManager();
                 WaypointCoord waypointCoord = new WaypointCoord(e.getClickedBlock().getLocation());
@@ -144,11 +154,13 @@ public class WorldListener implements Listener {
                     e.setCancelled(true);
 
                     if (BeaconWaypointsReloaded.getPlugin().getConfig().getBoolean("discovery-mode")) {
-                        //discovery mode
+                        // discovery mode
                         if (isWaypointPublic && !waypoint.playerDiscoveredWaypoint(player)) {
                             waypoint.addPlayerDiscovered(player);
                             if (!waypoint.getOwnerUUID().equals(player.getUniqueId()))
-                                player.sendMessage(ChatColor.GREEN + BeaconWaypointsReloaded.getLanguageManager().getString("discovered-waypoint") + ": " + ChatColor.BOLD + waypoint.getName());
+                                player.sendMessage(ChatColor.GREEN
+                                        + BeaconWaypointsReloaded.getLanguageManager().getString("discovered-waypoint")
+                                        + ": " + ChatColor.BOLD + waypoint.getName());
                         }
                     }
                     // Mở menu custom
@@ -158,32 +170,35 @@ public class WorldListener implements Listener {
         }
     }
 
-    //when player throws an ender pearl and is teleporting, cancel it
+    // when player throws an ender pearl and is teleporting, cancel it
     @EventHandler
     public void onProjectileThrow(ProjectileLaunchEvent e) {
         Projectile projectile = e.getEntity();
         if (projectile.getShooter() instanceof Player && projectile.getType() == EntityType.ENDER_PEARL) {
-            WaypointPlayer waypointPlayer = BeaconWaypointsReloaded.getWaypointManager().getPlayer(((Player) projectile.getShooter()).getUniqueId());
+            WaypointPlayer waypointPlayer = BeaconWaypointsReloaded.getWaypointManager()
+                    .getPlayer(((Player) projectile.getShooter()).getUniqueId());
             if (waypointPlayer != null && waypointPlayer.isTeleporting())
                 e.setCancelled(true);
         }
     }
 
-    //when player eats a chorus fruit and is teleporting, cancel it
+    // when player eats a chorus fruit and is teleporting, cancel it
     @EventHandler
     public void onEat(PlayerItemConsumeEvent e) {
         if (e.getItem().getType() == Material.CHORUS_FRUIT) {
-            WaypointPlayer waypointPlayer = BeaconWaypointsReloaded.getWaypointManager().getPlayer(e.getPlayer().getUniqueId());
+            WaypointPlayer waypointPlayer = BeaconWaypointsReloaded.getWaypointManager()
+                    .getPlayer(e.getPlayer().getUniqueId());
             if (waypointPlayer != null && waypointPlayer.isTeleporting())
                 e.setCancelled(true);
         }
     }
 
-    //disable damage to player when teleporting
+    // disable damage to player when teleporting
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
         if (e.getEntity().getType() == EntityType.PLAYER && e.getCause() == EntityDamageEvent.DamageCause.FALL) {
-            WaypointPlayer waypointPlayer = BeaconWaypointsReloaded.getWaypointManager().getPlayer(e.getEntity().getUniqueId());
+            WaypointPlayer waypointPlayer = BeaconWaypointsReloaded.getWaypointManager()
+                    .getPlayer(e.getEntity().getUniqueId());
             if (waypointPlayer != null && waypointPlayer.isTeleporting())
                 e.setCancelled(true);
         }
