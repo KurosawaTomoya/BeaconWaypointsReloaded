@@ -318,6 +318,21 @@ public class WaypointManager {
     }
 
     /**
+     * Cheap existence check using HashMap.containsKey (no list allocation) to see
+     * if any waypoint (public, pinned, private or inactive) exists at the given
+     * coordinate. Used by WorldListener to avoid the more expensive
+     * removeWaypointsAtCoord lookup when there is nothing to remove.
+     * @param coord
+     * @return true if at least one waypoint exists at coord
+     */
+    public boolean hasWaypointAtCoord(WaypointCoord coord) {
+        return publicWaypoints.containsKey(coord)
+                || pinnedWaypoints.containsKey(coord)
+                || inactiveWaypoints.containsKey(coord)
+                || privateWaypointsByCoord.containsKey(coord);
+    }
+
+    /**
      * Adds a player to the waypoint player list
      * @param uuid
      * @return waypointPlayer
