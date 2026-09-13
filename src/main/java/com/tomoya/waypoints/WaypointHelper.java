@@ -193,6 +193,9 @@ public class WaypointHelper {
      * @return Whether the player still meets payment requirements right before teleporting
      */
     public static boolean pay(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint) {
+        if (player.hasPermission("beaconwaypoints.bypass.cost"))
+            return true;
+
         FileConfiguration config = BeaconWaypointsReloaded.getPlugin().getConfig();
         String paymentMode = config.getString("payment-mode");
         if (paymentMode == null)
@@ -277,6 +280,9 @@ public class WaypointHelper {
      * @return
      */
     public static boolean checkPaymentRequirements(Player player, Waypoint startWaypoint, Waypoint destinationWaypoint, int costPerChunk) {
+        if (player.hasPermission("beaconwaypoints.bypass.cost"))
+            return true;
+
         FileConfiguration config = BeaconWaypointsReloaded.getPlugin().getConfig();
         LanguageManager languageManager = BeaconWaypointsReloaded.getLanguageManager();
 
@@ -477,7 +483,7 @@ public class WaypointHelper {
      * @param destinationWaypoint
      * @return description
      */
-    public static String getWaypointDescription(Waypoint startWaypoint, Waypoint destinationWaypoint) {
+    public static String getWaypointDescription(Waypoint startWaypoint, Waypoint destinationWaypoint, Player player) {
         StringBuilder description = new StringBuilder(ChatColor.RESET + "" + ChatColor.WHITE);
         FileConfiguration config = BeaconWaypointsReloaded.getPlugin().getConfig();
         LanguageManager languageManager = BeaconWaypointsReloaded.getLanguageManager();
@@ -493,16 +499,26 @@ public class WaypointHelper {
         if (paymentMode.equals("money") && essentials == null)
             paymentMode = "none";
         List<?> requiredItems = config.getList("required-items");
-        if (requiredItems != null && requiredItems.size() > 0 || !paymentMode.equals("none"))
-            description.append(ChatColor.YELLOW).append(languageManager.getString("cost")).append(": \n");
 
-        //xp or money payment
-        if (!paymentMode.equals("none")) {
-            description.append(ChatColor.WHITE);
-            if (paymentMode.equals("xp"))
-                description.append(calculateCost(startWaypoint, destinationWaypoint, "xp", config.getInt("xp-cost-per-chunk"), config.getDouble("cost-multiplier"))).append(" XP\n");
-            else if (paymentMode.equals("money") && essentials != null)
-                description.append(essentials.getSettings().getCurrencySymbol()).append(calculateCost(startWaypoint, destinationWaypoint, "money", config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
+
+        boolean hasBypass = player != null && player.hasPermission("beaconwaypoints.bypass.cost");
+
+        // 3. Xử lý hiển thị phần "Chi phí (Cost):"
+        if (hasBypass) {
+            // Nếu có perm Bypass thì in thẳng là Miễn phí, khỏi tính toán gì sất!
+            description.append(ChatColor.YELLOW).append(languageManager.getString("cost")).append(": \n");
+            description.append(ChatColor.GREEN).append("✨ Free (Bypass)\n");
+        } else {
+            if (requiredItems != null && requiredItems.size() > 0 || !paymentMode.equals("none"))
+                description.append(ChatColor.YELLOW).append(languageManager.getString("cost")).append(": \n");
+            //xp or money payment
+            if (!paymentMode.equals("none")) {
+                description.append(ChatColor.WHITE);
+                if (paymentMode.equals("xp"))
+                    description.append(calculateCost(startWaypoint, destinationWaypoint, "xp", config.getInt("xp-cost-per-chunk"), config.getDouble("cost-multiplier"))).append(" XP\n");
+                else if (paymentMode.equals("money") && essentials != null)
+                    description.append(essentials.getSettings().getCurrencySymbol()).append(calculateCost(startWaypoint, destinationWaypoint, "money", config.getInt("money-cost-per-chunk"), config.getDouble("cost-multiplier"))).append("\n");
+            }
         }
 
         //required items
