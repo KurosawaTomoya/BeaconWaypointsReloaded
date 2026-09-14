@@ -42,7 +42,7 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 - BeaconWaypoints.breakWaypointBeacons: Allows players to break beacons that have waypoints
 - BeaconWaypoints.manageAllWaypoints: Allows players to edit, pin, or remove all public waypoints and corresponding beacons
 - BeaconWaypoints.reload: Allows players to reload the config
-- BeaconWaypoints.byoass.cost: Allows players to bypass cost (xp or money)
+- BeaconWaypoints.bypass.cost: Allows players to bypass cost (xp or money)
 
 
 ## Configuration
