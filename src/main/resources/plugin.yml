@@ -33,3 +33,6 @@ permissions:
   BeaconWaypoints.reload:
     description: Allows players to reload the config
     default: op
+  beaconwaypoints.bypass.cost:
+    description: Allows players to teleport without paying waypoint costs
+    default: op
