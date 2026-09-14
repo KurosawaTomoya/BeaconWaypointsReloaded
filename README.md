@@ -3,11 +3,11 @@ I'm not a professional developer, just a regular person coding with the help of 
 
 This project may not follow best practices and could contain bugs.
 
-# Beacon Waypoints
+# Beacon Waypoints Reloaded
 ### This plugin gives beacons extra functionality by letting players use beacons to fast travel between them! Install this plugin by putting the jar file into your plugins folder and starting/restarting the server.
 
 
-Supports versions i dont know but it work perfectly in 1.21.11
+Supports versions i dont know but it work perfectly in 1.21.11 - 26.2
 
 This plugin uses bStats.
 
@@ -42,6 +42,7 @@ Note: Teleportation between beacons requires the beacon to have no blocks inside
 - BeaconWaypoints.breakWaypointBeacons: Allows players to break beacons that have waypoints
 - BeaconWaypoints.manageAllWaypoints: Allows players to edit, pin, or remove all public waypoints and corresponding beacons
 - BeaconWaypoints.reload: Allows players to reload the config
+- BeaconWaypoints.byoass.cost: Allows players to bypass cost (xp or money)
 
 
 ## Configuration
