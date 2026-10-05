@@ -2,7 +2,7 @@
 I'm not a professional developer, just a regular person coding with the help of AI.
 
 This project may not follow best practices and could contain bugs.
-
+> **This project is a fork of [BeaconWaypoints](https://github.com/energy-sync/BeaconWaypoints), originally created by energy-sync.**
 # Beacon Waypoints Reloaded
 ### This plugin gives beacons extra functionality by letting players use beacons to fast travel between them! Install this plugin by putting the jar file into your plugins folder and starting/restarting the server.
 
